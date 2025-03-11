@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Party Cards</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+   
+</head>
+
+<body>
+    <div class="container mt-4">
+
+        <div class="row">
+            <button class="btn btn-primary ms-3 mb-3" data-bs-toggle="modal" data-bs-target="#myModal">create</button>
+        </div>
+
+        <!-- 모달 -->
+    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel">정보 입력</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="title" class="form-label">제목:</label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">카테고리:</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="content" class="form-label">내용:</label>
+                            <textarea class="form-control" id="content" name="content" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="date" class="form-label">일시:</label>
+                            <input type="datetime-local" class="form-control" id="date" name="date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="participants" class="form-label">인원:</label>
+                            <input type="number" class="form-control" id="participants" name="participants" required>
+                        </div>
+                        <!-- post 버튼 함수 걸어주기기 -->
+                        <button type="submit" class="btn btn-primary" id="postPtData">제출</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row" id="card-box">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <span class="badge bg-success">Health</span>
+                    <span class="text-muted"><i class="bi bi-people"></i> 3/5</span>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Morning Workout Group</h5>
+                    <div class="d-flex align-items-center mb-2">
+                        <small class="text-muted">Founded by Alex Kim</small>
+                    </div>
+                    <p class="card-text">Join us for morning workouts including jogging, stretching, and basic strength training. All fitness levels welcome!</p>
+                    <div class="d-flex text-muted small mb-3">
+                        <span><i class="bi bi-calendar"></i> Mon, Wed, Fri</span>
+                        <span class="ms-3"><i class="bi bi-clock"></i> 7:00 AM</span>
+                    </div>
+                    <button class="btn btn-primary w-100" id="joinBtn">Join Party</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    </div>
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+
+   
+    <script>
+        //본인이 로그인 한다면 뽑을 수 있는 데이터
+        const partymaneserName = "조정민";
+        const partymaneserCord = "8-25";
+
+        
+
+        //본인이 로그인한다면 뽑을 수 있는 데이터터
+        const partymember = "이영준";
+        const partymemberCord = "9-23"; 
+      
+        // post 하며 파티의 내용을 보내는 버튼의 변수
+        const $postPtBtn = document.querySelector('#postPtData');
+        const $joinBtn = document.querySelector('#joinBtn');
+
+
+        const $title = document.querySelector('#title');
+        const $category = document.querySelector('#name'); // 'name' 대신 'category'로 변경
+        const $content = document.querySelector('#content');
+        const $date = document.querySelector('#date');
+        const $participants = document.querySelector('#participants');
+        const $cardBox = document.querySelector('#card-box');
+
+        $postPtBtn.addEventListener('click', ()=>postPtData());
+        
+        document.addEventListener("DOMContentLoaded", function () {
+        let result = [];
+        fetch("http://127.0.0.1:5000/lodingdata")
+          .then((response) => response.json())
+          .then((data) => {
+            if (data && data.length > 0) {
+              for (let i = 0; i < data.length; i++) {
+                addparty(data[i].category_give, data[i].partparticipants_give, data[i].title_give, data[i].content_give, data[i].date_give);
+                console.log(data[i]);
+              }
+            }
+          }) .catch((error) => console.error("에러발생", error))
+        });
+         
+
+        function addparty(category, title, content, date, participants){
+           let card = `
+         
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <span class="badge bg-success">${category}</span>
+                    <span class="text-muted"><i class="bi bi-people"></i>희망인원${participants}</span>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">${title}</h5>
+                    <div class="d-flex align-items-center mb-2">
+                        <small class="text-muted">회원가입로직 구현전까지는 작성란이 빈다.</small>
+                    </div>
+                    <p class="card-text">${content}</p>
+                    <div class="d-flex text-muted small mb-3">
+                        <span><i class="bi bi-calendar"></i>날짜 형식 분류를 안해서 일단은 ${date}</span>
+                        <span class="ms-3"><i class="bi bi-clock"></i> 7:00 AM</span>
+                    </div>
+                    <button class="btn btn-primary w-100" id="joinBtn">참석버튼</button>
+                    <button class="btn btn-primary w-100" id="deleteBtn">삭제버튼</button>
+                </div>
+            </div>`
+    
+        const cardElement = document.createElement("div");
+        cardElement.innerHTML = card;
+        cardElement.className = "col-md-4";
+        const $joinBtn = cardElement.querySelector('#joinBtn').addEventListener('click', ()=>joinParty())
+        const $deleteBtn = cardElement.querySelector("#deleteBtn").addEventListener('click',()=>deleteParty())
+        $cardBox.appendChild(cardElement);        
+
+    }
+
+
+    function joinParty(){
+        fetch("http://127.0.0.1:5000/joinParty", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json", // 요청 헤더
+            },
+            body: JSON.stringify({
+                partyCord_give: partymaneserCord,
+                party_member: partymember,
+                partymember_cord: partymemberCord,
+            
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.result) {
+             
+                console.log("성공");
+              } else {
+                console.log("실패");
+              }
+            })
+            .catch((error) => console.error("에러발생", error));
+        }
+       
+
+
+
+
+       function deleteParty(){
+        fetch("http://127.0.0.1:5000/deleteParty", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json", // 요청 헤더
+            },
+            body: JSON.stringify({
+            
+            partyCord_give: partymaneserCord,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.result) {
+                window.location.reload();
+                console.log("성공");
+              } else {
+                console.log("실패");
+              }
+            })
+            .catch((error) => console.error("에러발생", error));
+        }
+       
+
+
+
+
+        function postPtData(){
+            fetch("http://127.0.0.1:5000/postPtdata", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json", // 요청 헤더
+            },
+            body: JSON.stringify({
+            title_give: $title.value,
+            category_give: $category.value,
+            content_give: $content.value,
+            date_give: $date.value,
+            partparticipants_give: $participants.value,
+            name_give: partymaneserName,
+            partyCord_give: partymaneserCord,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.result) {
+                window.location.reload();
+                console.log("성공");
+              } else {
+                console.log("실패");
+              }
+            })
+            .catch((error) => console.error("에러발생", error));
+        }
+      
+        
+       
+// 제목, 작성자, 인원, 내용, 일시시
+
+
+
+        
+
+        
+    </script>
+    
+</body>
+
+</html>
