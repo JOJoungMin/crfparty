@@ -4,7 +4,7 @@ from pymongo import MongoClient
 import jwt
 import datetime
 from functools import wraps
-
+import json
 SECRET_KEY = "your_secret_key"  # JWT 서명에 사용할 비밀키
 
 
@@ -86,7 +86,7 @@ def login_post():
         print("========================\n")
         
         # 클라이언트에 토큰 반환
-        return jsonify({'result': 'success', 'token': token, "tikeb": jsonify(decoded)})
+        return jsonify({'result': 'success', 'token': token, "tikeb": json.dumps(decoded)})
     else:
         print(f"\n로그인 실패: {user_id}")
         return jsonify({'result': 'false'})
