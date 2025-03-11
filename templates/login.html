@@ -40,7 +40,7 @@
                   type="button"
                   class="btn btn-primary w-100 mb-4"
                   id="loginBtn"
-                  onclick="window.location.href='/index'"
+                 
                 >
                   로그인
                 </button>
@@ -84,13 +84,13 @@
           .then((data) => {
             if (data.result === "success") {
               // JWT 토큰을 localStorage에 저장
-              localStorage.setItem("token", data.token);
+              localStorage.setItem("token", data.tikeb);
 
               // 성공 메시지 박스 표시
-              showTokenModal(data.token);
+              // showTokenModal(data.token);
 
               // 페이지 이동은 모달 닫을 때 하도록 수정
-              // window.location.href = "/index";
+              window.location.href = "/index";
             } else {
               console.log("로그인 실패");
               alert("아이디 또는 비밀번호가 올바르지 않습니다.");
@@ -164,7 +164,7 @@
           .addEventListener("click", function () {
             document.body.removeChild(modalContainer);
             // 모달을 닫은 후 페이지 이동
-            window.location.href = "/index";
+            // window.location.href = "/index";
           });
       }
     </script>

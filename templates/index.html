@@ -10,7 +10,8 @@
 </head>
 
 <body>
-  <!-- <h1>전역 변수 값: {{ global_variable }}</h1> -->
+  <h1>로컬 저장소에서 토큰 확인</h1>
+  <div id="tokenValue"></div>
     <div class="container mt-4">
 
         <div class="row">
@@ -93,6 +94,16 @@
 
    
     <script>
+        const token = localStorage.getItem('token');
+
+// 가져온 값을 JSON.parse()로 객체로 변환한 후, JSON.stringify()로 문자열로 변환합니다.
+const tokenValueDiv = document.getElementById('tokenValue');
+if (token) {
+    const tokenObject = JSON.parse(token); // 문자열을 객체로 변환
+    tokenValueDiv.textContent = `토큰 값: ${JSON.stringify(tokenObject, null, 2)}`; // 객체를 문자열로 변환
+} else {
+    tokenValueDiv.textContent = '토큰 값이 없습니다.';
+}
         //본인이 로그인 한다면 뽑을 수 있는 데이터
         const partymaneserName = "조정민";
         const partymaneserCord = "8-25";

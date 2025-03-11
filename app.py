@@ -11,7 +11,7 @@ SECRET_KEY = "your_secret_key"  # JWT 서명에 사용할 비밀키
 client = MongoClient('localhost', 27017)
 db = client.party
 
-global id_cord
+
 
 # 코딩 시작c
 app = Flask(__name__)
@@ -74,7 +74,7 @@ def login_post():
         print(f"사용자 이름: {login_data['user_name']}")
         print(f"생성된 토큰: {token}")
         
-        id_cord =user_id
+      
         # 토큰 디코딩 정보도 출력
         try:
             decoded = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
@@ -86,7 +86,7 @@ def login_post():
         print("========================\n")
         
         # 클라이언트에 토큰 반환
-        return jsonify({'result': 'success', 'token': token})
+        return jsonify({'result': 'success', 'token': token, "tikeb": jsonify(decoded)})
     else:
         print(f"\n로그인 실패: {user_id}")
         return jsonify({'result': 'false'})
