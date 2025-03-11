@@ -10,9 +10,49 @@ db = client.party
 app = Flask(__name__)
 CORS(app)
 
+
 @app.route('/')
 def home():
-    return "Hello, Flask!"
+    return render_template('login.html')
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+
+@app.route('/register')
+def register():
+    return render_template('register.html')
+
+@app.route('/register', methods=['POST'])
+def register_post():
+
+    data = request.get_json()
+
+   
+    user_name = data.get('user_name') 
+
+    user_id  = data.get('user_id')
+    user_cord = data.get('user_cord')
+    user_password = data.get('user_password')
+    print(type(user_cord))
+    doc = {
+        'user_name': user_name,
+        'user_id': user_id,
+        'user_cord': user_cord,
+        'user_password': user_password,
+    }
+
+    db.userdata.insert_one(doc)
+   
+
+    return render_template('register.html')
+
+@app.route('/index')
+def index():
+    return render_template('index.html')  # 로그인 후 index.html로 이동
+
+
 
 @app.route('/postPtdata', methods=['POST'])
 def post_data():
