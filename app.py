@@ -75,35 +75,71 @@ def index():
 
 
 
-@app.route('/postPtdata', methods=['POST'])
-def post_data():
-   data = request.get_json()  
+# @app.route('/postPtdata', methods=['POST'])
+# def post_data():
+#    data = request.get_json()  
   
-   title_give =data.get('title_give') 
-   category_give = data.get('category_give')
-   content_give = data.get('content_give')
-   date_give = data.get('date_give')
-   partparticipants_give = data.get('partparticipants_give')
-   partymaneserName = data.get('name_give')
-   partymaneserCord_give = data.get('partyCord_give')
+#    title_give =data.get('title_give') 
+#    category_give = data.get('category_give')
+#    content_give = data.get('content_give')
+#    date_give = data.get('date_give')
+#    partparticipants_give = data.get('partparticipants_give')
+#    partymaneserName = data.get('name_give')
+#    partymaneserCord_give = data.get('partyCord_give')
 
    
-   doc = {
-     'title_give': title_give,
-     'category_give': category_give,
-     'content_give': content_give,
-     'date_give': date_give,
-     'partparticipants_give': partparticipants_give,
-     'partymaneserName_name' : partymaneserName,
-     'partymanaser_cord': partymaneserCord_give,
-     'userArr': [],
-     'userCord': [],
-   }
+#    doc = {
+#      'title_give': title_give,
+#      'category_give': category_give,
+#      'content_give': content_give,
+#      'date_give': date_give,
+#      'partparticipants_give': partparticipants_give,
+#      'partymaneserName_name' : partymaneserName,
+#      'partymanaser_cord': partymaneserCord_give,
+#      'userArr': [],
+#      'userCord': [],
+#    }
 
-   db.party.insert_one(doc)
-   return jsonify({'result': 'succese'})
+#    db.party.insert_one(doc)
+#    return jsonify({'result': 'succese'})
 
 
+@app.route('/postPtdata', methods=['POST'])
+def post_data():
+    data = request.get_json()  
+
+    title_give = data.get('title_give') 
+    category_give = data.get('category_give')
+    content_give = data.get('content_give')
+    date_give = data.get('date_give')
+    partparticipants_give = data.get('partparticipants_give')
+    partymaneserName = data.get('name_give')
+    partymaneserCord_give = data.get('partyCord_give')
+
+    doc = {
+        'title_give': title_give,
+        'category_give': category_give,
+        'content_give': content_give,
+        'date_give': date_give,
+        'partparticipants_give': partparticipants_give,
+        'partymaneserName_name': partymaneserName,
+        'partymanaser_cord': partymaneserCord_give,
+    }
+
+    # party 컬렉션에서 단 하나의 문서를 찾아서 userArr 배열에 doc을 추가
+    db.party.update_one(
+        {},  # 조건: 모든 문서에 대해
+        {'$setOnInsert': {'userArr': []}},  # userArr 배열이 없으면 생성
+        upsert=True  # 문서가 없으면 새로 생성
+    )
+
+    # userArr 배열에 doc 추가
+    db.party.update_one(
+        {},  # 조건: 모든 문서에 대해
+        {'$push': {'userArr': doc}}  # userArr 배열에 doc 추가
+    )
+
+    return jsonify({'result': 'success'})
 
 @app.route('/joinParty', methods=['POST'])
 def join_party():
@@ -127,22 +163,68 @@ def join_party():
         return jsonify({'result': 'fail', 'message': '문서를 찾을 수 없습니다.'})
       
 
+# @app.route('/lodingdata')
+# def load_data():
+#     result = list(db.party.find({}, {'_id': 0}))
+#     print(len(result))
+#     data_list = []
+#     if result:
+#        for data in result:
+#            print(data)
+#            data_list.append({
+#                'Arr_give': data.get('title_give'),
+#                'category_give': data.get('category_give'),
+#                "content_give" : data.get('content_give'),
+#                "date_give" : data.get('date_give'),
+#                "partparticipants_give" : data.get('partparticipants_give'),
+#         })
+#        return jsonify(data_list), 200
+#     else:
+#        return jsonify([]), 200    
+
+
 @app.route('/lodingdata')
 def load_data():
-    result = list(db.party.find({}))
+    result = list(db.party.find({}, {'_id': 0}))
+    print(len(result))
     data_list = []
     if result:
        for data in result:
-           data_list.append({
-               'title_give': data.get('title_give'),
-               'category_give': data.get('category_give'),
-               "content_give" : data.get('content_give'),
-               "date_give" : data.get('date_give'),
-               "partparticipants_give" : data.get('partparticipants_give'),
-        })
+            data_list.append(data)
+       print(data_list)
        return jsonify(data_list), 200
     else:
        return jsonify([]), 200    
+
+
+
+# @app.route('/lodingdata')
+# def load_data():
+#  result = list(db.party.find({}))
+#  print(len(result))
+#  data_list = []
+#  index = 제공받은_인덱스  # 미리 제공받은 인덱스 값
+
+#  if result:
+#     for data in result:
+#         data_list.append({
+#             'title_give': data.get('title_give'),
+#             'category_give': data.get('category_give'),
+#             "content_give": data.get('content_give'),
+#             "date_give": data.get('date_give'),
+#             "partparticipants_give": data.get('partparticipants_give'),
+#         })
+    
+#     # 인덱스가 유효한지 확인
+#     if 0 <= index < len(data_list):
+#         # 인덱스에 해당하는 데이터 출력
+#         print(data_list[index])
+#         return jsonify(data_list[index]), 200
+#     else:
+#         return jsonify({"error": "Invalid index"}), 400
+# else:
+#     return jsonify([]), 200
+
 
 @app.route('/deleteParty', methods=['POST'])
 def delete_Party():
