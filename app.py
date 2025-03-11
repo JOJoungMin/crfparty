@@ -11,6 +11,7 @@ SECRET_KEY = "your_secret_key"  # JWT 서명에 사용할 비밀키
 client = MongoClient('localhost', 27017)
 db = client.party
 
+global id_cord
 
 # 코딩 시작c
 app = Flask(__name__)
@@ -48,6 +49,7 @@ def login():
 
 @app.route('/login', methods=['POST'])
 def login_post():
+    
     data = request.get_json()
 
     user_id = data.get('user_id')
@@ -72,6 +74,7 @@ def login_post():
         print(f"사용자 이름: {login_data['user_name']}")
         print(f"생성된 토큰: {token}")
         
+        id_cord =user_id
         # 토큰 디코딩 정보도 출력
         try:
             decoded = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
@@ -118,7 +121,8 @@ def register_post():
 
 @app.route('/index')
 def index():
-    return render_template('index.html')  # 로그인 후 index.html로 이동
+    
+     return render_template('index.html') 
 
 
 @app.route('/postPtdata', methods=['POST'])
