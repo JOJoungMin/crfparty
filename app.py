@@ -19,6 +19,27 @@ def home():
 def login():
     return render_template('login.html')
 
+@app.route('/login' , methods=['POST'])
+def login_post():
+
+    data = request.get_json()
+
+    user_id = data.get('user_id')
+    user_password = data.get('user_password')
+
+    login_data = db.userdata.find_one({
+        'user_id': user_id,
+        'user_password': user_password  # 비밀번호도 조건에 추가
+    })
+    print(login_data['user_name'])
+  
+
+    if login_data:
+       print(login_data)
+       return jsonify({'result': 'success'})
+    else:
+         return jsonify({'result': 'false'})
+
 
 @app.route('/register')
 def register():
