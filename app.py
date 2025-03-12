@@ -165,18 +165,16 @@ def join_party():
    data = request.get_json()  
 
    partymanaser_cord = data.get('partyCord_give')
-   print(partymanaser_cord)
    user_arr = data.get('party_member')
    userCord_arr = data.get('partymember_cord')
-   print(type(user_arr))
-   print(userCord_arr)
+   
 #  
    result = db.party.update_one(
     {'partymanaser_cord': partymanaser_cord},  
     {'$push': {'userArr': user_arr, 'userCord': userCord_arr}}
 )
-
-
+   
+   
    if result.modified_count > 0:
         return jsonify({'result': 'success'})
    else:
