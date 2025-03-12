@@ -84,7 +84,7 @@
           .then((data) => {
             if (data.result === "success") {
               // JWT 토큰을 localStorage에 저장
-              localStorage.setItem("token", data.tikeb);
+              localStorage.setItem("token", data.userdata);
 
               // 성공 메시지 박스 표시
               // showTokenModal(data.token);

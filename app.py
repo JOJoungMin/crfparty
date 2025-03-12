@@ -74,7 +74,12 @@ def login_post():
         print(f"사용자 이름: {login_data['user_name']}")
         print(f"생성된 토큰: {token}")
         
-      
+        
+        doc = {
+            'user_name': login_data['user_name'],
+            'user_cord': login_data['user_cord'],
+        }
+
         # 토큰 디코딩 정보도 출력
         try:
             decoded = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
@@ -86,7 +91,7 @@ def login_post():
         print("========================\n")
         
         # 클라이언트에 토큰 반환
-        return jsonify({'result': 'success', 'token': token, "tikeb": json.dumps(decoded)})
+        return jsonify({'result': 'success', 'token': token, "userdata": json.dumps(doc)})
     else:
         print(f"\n로그인 실패: {user_id}")
         return jsonify({'result': 'false'})
@@ -160,17 +165,18 @@ def join_party():
    data = request.get_json()  
 
    partymanaser_cord = data.get('partyCord_give')
+   print(partymanaser_cord)
    user_arr = data.get('party_member')
    userCord_arr = data.get('partymember_cord')
-
-
+   print(type(user_arr))
+   print(userCord_arr)
+#  
    result = db.party.update_one(
-        {' partymanaser_cord':partymanaser_cord},  
-        {'$push': {'userArr': user_arr,
-                  'userCord' : userCord_arr} }  # 배열에 새로운 할 일을 추가
-    )
-   
-    
+    {'partymanaser_cord': partymanaser_cord},  
+    {'$push': {'userArr': user_arr, 'userCord': userCord_arr}}
+)
+
+
    if result.modified_count > 0:
         return jsonify({'result': 'success'})
    else:
@@ -189,6 +195,9 @@ def load_data():
                "content_give" : data.get('content_give'),
                "date_give" : data.get('date_give'),
                "partparticipants_give" : data.get('partparticipants_give'),
+               "partymaneserName": data.get('partymaneserName_name'),
+               "partymanaser_cord": data.get('partymanaser_cord'),
+               "userArr": data.get('userCord'),
         })
        return jsonify(data_list), 200
     else:
@@ -213,10 +222,35 @@ def delete_Party():
     else:
         return jsonify({'result': 'false', 'message': '해당 파티티는 db에 존재하지 않는다'}), 404
 
+
+@app.route('/quitParty', methods=['POST'])
+def delete_data():
+   data = request.get_json()  
+   partyCode = data.get('partyCode')
+   index_give = data.get('index')
+   
+
+   document = db.todo.find_one({'partymanaser_cord': partyCode})
+   
+   if document and 'userCord' in document:
+       party_list = document['userCord']
+
+       if 0<= index_give <= len(party_list):
+           new_todo_list = party_list[:index_give] + party_list[index_give+1:]
+
+           db.todo.update_one(
+               {'partymanaser_cord': partyCode},
+               {'$set': {'party': new_todo_list}}
+           )
+           return jsonify({'result': 'success', 'msg': '값이 삭제되었습니다.'})
+       else:
+           return jsonify({'result': 'fail', 'msg': '유효하지 않은 인덱스입니다.'})
+   else:
+        return jsonify({'result': 'fail', 'msg': '문서를 찾을 수 없습니다.'})
+          
+
+
 if __name__ == '__main__':  
    app.run('0.0.0.0', port=5000, debug=True)
 
 
-
-if __name__ == '__main__':
-     app.run(debug=True)

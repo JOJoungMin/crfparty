@@ -95,19 +95,13 @@
    
     <script>
         const token = localStorage.getItem('token');
+        tokenob = JSON.parse(token);
 
-// 가져온 값을 JSON.parse()로 객체로 변환한 후, JSON.stringify()로 문자열로 변환합니다.
-const tokenValueDiv = document.getElementById('tokenValue');
-if (token) {
-    const tokenObject = JSON.parse(token); // 문자열을 객체로 변환
-    tokenValueDiv.textContent = `토큰 값: ${JSON.stringify(tokenObject, null, 2)}`; // 객체를 문자열로 변환
-} else {
-    tokenValueDiv.textContent = '토큰 값이 없습니다.';
-}
-        //본인이 로그인 한다면 뽑을 수 있는 데이터
-        const partymaneserName = "조정민";
-        const partymaneserCord = "8-25";
+        const UserName = tokenob.user_name;
+        const partyCode = tokenob.user_cord;
 
+        
+         
         
 
         //본인이 로그인한다면 뽑을 수 있는 데이터터
@@ -133,9 +127,11 @@ if (token) {
         fetch("http://127.0.0.1:5000/lodingdata")
           .then((response) => response.json())
           .then((data) => {
+           
             if (data && data.length > 0) {
               for (let i = 0; i < data.length; i++) {
-                addparty(data[i].category_give, data[i].partparticipants_give, data[i].title_give, data[i].content_give, data[i].date_give);
+                addparty(data[i].category_give, data[i].partparticipants_give, data[i].title_give, 
+                data[i].partymaneserName, data[i].partymanaser_cord, data[i].content_give, data[i].date_give, data[i].userArr);
                 console.log(data[i]);
               }
             }
@@ -143,8 +139,88 @@ if (token) {
         });
          
 
-        function addparty(category, title, content, date, participants){
-           let card = `
+        function addparty(category, participants, title, partyName, partyCord, content, date, memberArr){
+           
+
+          let checkCode = {
+            check: false,
+            index: 0
+          }
+
+          for(let i =0; i<memberArr.length;i++){
+            if(partyCode===memberArr[i]){
+              checkCode.check = true;
+              checkCode.index = i
+              break;
+            }
+          }
+
+          if(checkCode.check){
+
+       
+              let partyCard = `
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <span class="badge bg-success">${category} 파티참여</span>
+                    <span class="text-muted"><i class="bi bi-people"></i>희망인원${participants}</span>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">${title}</h5>
+                    <div class="d-flex align-items-center mb-2">
+                        <small class="text-muted">${partyName} ${partyCord}.</small>
+                    </div>
+                    <p class="card-text">${content}</p>
+                    <div class="d-flex text-muted small mb-3">
+                        <span><i class="bi bi-calendar"></i> ${date}</span>
+                        <span class="ms-3"><i class="bi bi-clock"></i> 7:00 AM</span>
+                    </div>
+
+                    <button class="btn btn-primary w-100" id="deleteBtn">파티 탈퇴</button>
+                </div>
+            </div>
+            `;
+            const cardElement = document.createElement("div");
+            cardElement.innerHTML = partyCard;
+            cardElement.className = "col-md-4";
+           
+            const $deleteBtn = cardElement.querySelector("#deleteBtn").addEventListener('click',()=>quitParty(checkCode.index,partyCard))
+            $cardBox.appendChild(cardElement);        
+            }
+           
+          
+
+
+          if(partyCode===partyCord){
+            let managerCard = `
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <span class="badge bg-success">${category} 파티장: ${UserName}</span>
+                    <span class="text-muted"><i class="bi bi-people"></i>희망인원${participants}</span>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">${title}</h5>
+                    <div class="d-flex align-items-center mb-2">
+                        <small class="text-muted">${partyName} ${partyCord}.</small>
+                    </div>
+                    <p class="card-text">${content}</p>
+                    <div class="d-flex text-muted small mb-3">
+                        <span><i class="bi bi-calendar"></i> ${date}</span>
+                        <span class="ms-3"><i class="bi bi-clock"></i> 7:00 AM</span>
+                    </div>
+
+                    <button class="btn btn-primary w-100" id="deleteBtn">삭제버튼</button>
+                </div>
+            </div>
+            `;
+            const cardElement = document.createElement("div");
+            cardElement.innerHTML = managerCard;
+            cardElement.className = "col-md-4";
+           
+            const $deleteBtn = cardElement.querySelector("#deleteBtn").addEventListener('click',()=>deleteParty())
+            $cardBox.appendChild(cardElement);        
+
+          } else {
+          let card = `
          
             <div class="card">
                 <div class="card-header d-flex justify-content-between">
@@ -154,38 +230,35 @@ if (token) {
                 <div class="card-body">
                     <h5 class="card-title">${title}</h5>
                     <div class="d-flex align-items-center mb-2">
-                        <small class="text-muted">회원가입로직 구현전까지는 작성란이 빈다.</small>
+                        <small class="text-muted">${partyName} ${partyCord}.</small>
                     </div>
                     <p class="card-text">${content}</p>
                     <div class="d-flex text-muted small mb-3">
-                        <span><i class="bi bi-calendar"></i>날짜 형식 분류를 안해서 일단은 ${date}</span>
+                        <span><i class="bi bi-calendar"></i> ${date}</span>
                         <span class="ms-3"><i class="bi bi-clock"></i> 7:00 AM</span>
                     </div>
                     <button class="btn btn-primary w-100" id="joinBtn">참석버튼</button>
-                    <button class="btn btn-primary w-100" id="deleteBtn">삭제버튼</button>
+                 
                 </div>
             </div>`
-    
+        
         const cardElement = document.createElement("div");
         cardElement.innerHTML = card;
         cardElement.className = "col-md-4";
-        const $joinBtn = cardElement.querySelector('#joinBtn').addEventListener('click', ()=>joinParty())
-        const $deleteBtn = cardElement.querySelector("#deleteBtn").addEventListener('click',()=>deleteParty())
+        const $joinBtn = cardElement.querySelector('#joinBtn').addEventListener('click', ()=>joinParty(partyCord))
         $cardBox.appendChild(cardElement);        
 
-    }
-
-
-    function joinParty(){
-        fetch("http://127.0.0.1:5000/joinParty", {
+    }}
+    
+    function quitParty(index,partyCode){
+      fetch("http://127.0.0.1:5000/quitParty", {
             method: "POST",
             headers: {
               "Content-Type": "application/json", // 요청 헤더
             },
             body: JSON.stringify({
-                partyCord_give: partymaneserCord,
-                party_member: partymember,
-                partymember_cord: partymemberCord,
+              partyCode: partyCode,
+              index: index,
             
             }),
           })
@@ -194,6 +267,34 @@ if (token) {
               if (data.result) {
              
                 console.log("성공");
+                window.location.reload();
+              } else {
+                console.log("실패");
+              }
+            })
+            .catch((error) => console.error("에러발생", error));
+        }
+    
+
+    function joinParty(partyCord_give){
+        fetch("http://127.0.0.1:5000/joinParty", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json", // 요청 헤더
+            },
+            body: JSON.stringify({
+                partyCord_give: partyCord_give,
+                party_member: UserName,
+                partymember_cord: partyCode,
+            
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.result) {
+             
+                console.log("성공");
+                window.location.reload();
               } else {
                 console.log("실패");
               }
@@ -213,7 +314,7 @@ if (token) {
             },
             body: JSON.stringify({
             
-            partyCord_give: partymaneserCord,
+            partyCord_give: partyCode,
             }),
           })
             .then((response) => response.json())
@@ -244,8 +345,8 @@ if (token) {
             content_give: $content.value,
             date_give: $date.value,
             partparticipants_give: $participants.value,
-            name_give: partymaneserName,
-            partyCord_give: partymaneserCord,
+            name_give: UserName,
+            partyCord_give:partyCode,
             }),
           })
             .then((response) => response.json())
