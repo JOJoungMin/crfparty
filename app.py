@@ -230,24 +230,41 @@ def delete_data():
    index_give = data.get('index')
    
 
-   document = db.todo.find_one({'partymanaser_cord': partyCode})
-   
+   document = db.party.find_one({'partymanaser_cord': partyCode})
+
    if document and 'userCord' in document:
-       party_list = document['userCord']
+    party_list = document['userCord']
 
-       if 0<= index_give <= len(party_list):
-           new_todo_list = party_list[:index_give] + party_list[index_give+1:]
+    if 0 <= index_give <= len(party_list):
+        new_party_list = party_list[:index_give] + party_list[index_give + 1:]
 
-           db.todo.update_one(
-               {'partymanaser_cord': partyCode},
-               {'$set': {'party': new_todo_list}}
-           )
-           return jsonify({'result': 'success', 'msg': '값이 삭제되었습니다.'})
-       else:
-           return jsonify({'result': 'fail', 'msg': '유효하지 않은 인덱스입니다.'})
+        # userArr 삭제 로직 추가
+        if 'userArr' in document:
+            user_arr = document['userArr']
+
+            if 0 <= index_give <= len(user_arr):
+                new_user_arr = user_arr[:index_give] + user_arr[index_give + 1:]
+            else:
+                return jsonify({'result': 'fail', 'msg': '유효하지 않은 인덱스입니다.'})
+
+            # userArr 업데이트
+            db.party.update_one(
+                {'partymanaser_cord': partyCode},
+                {'$set': {'userCord': new_party_list, 'userArr': new_user_arr}}
+            )
+        else:
+            # userArr가 없을 경우
+            db.party.update_one(
+                {'partymanaser_cord': partyCode},
+                {'$set': {'userCord': new_party_list}}
+            )
+
+        return jsonify({'result': 'success', 'msg': '값이 삭제되었습니다.'})
+    else:
+        return jsonify({'result': 'fail', 'msg': '유효하지 않은 인덱스입니다.'})
    else:
-        return jsonify({'result': 'fail', 'msg': '문서를 찾을 수 없습니다.'})
-          
+        return jsonify({'result': 'fail', 'msg': '문서가 존재하지 않거나 userCord가 없습니다.'})
+   
 
 
 if __name__ == '__main__':  

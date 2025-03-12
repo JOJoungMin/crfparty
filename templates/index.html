@@ -156,7 +156,7 @@
           }
 
           if(checkCode.check){
-
+              console.log(checkCode.index)
        
               let partyCard = `
             <div class="card">
@@ -183,8 +183,9 @@
             cardElement.innerHTML = partyCard;
             cardElement.className = "col-md-4";
            
-            const $deleteBtn = cardElement.querySelector("#deleteBtn").addEventListener('click',()=>quitParty(checkCode.index,partyCard))
+            const $deleteBtn = cardElement.querySelector("#deleteBtn").addEventListener('click',()=>quitParty(checkCode.index,partyCord))
             $cardBox.appendChild(cardElement);        
+            return;
             }
            
           
@@ -195,6 +196,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between">
                     <span class="badge bg-success">${category} 파티장: ${UserName}</span>
+                    <span class="badge bg-success"></span>
                     <span class="text-muted"><i class="bi bi-people"></i>희망인원${participants}</span>
                 </div>
                 <div class="card-body">
@@ -218,7 +220,7 @@
            
             const $deleteBtn = cardElement.querySelector("#deleteBtn").addEventListener('click',()=>deleteParty())
             $cardBox.appendChild(cardElement);        
-
+            return;
           } else {
           let card = `
          
@@ -265,9 +267,9 @@
             .then((response) => response.json())
             .then((data) => {
               if (data.result) {
-             
-                console.log("성공");
                 window.location.reload();
+                console.log(data.result);
+               
               } else {
                 console.log("실패");
               }
