@@ -17,8 +17,8 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">
-          <img src="{{ url_for('static', filename='people_icon.png') }}" alt="" width="30" height="24"
-            class="d-inline-block align-text-top">
+          <!-- <img src="{{ url_for('static', filename='people_icon.png') }}" alt="" width="30" height="24"
+            class="d-inline-block align-text-top"> -->
           파티 구함!
         </a>
         <div class="collapse navbar-collapse">
@@ -146,7 +146,7 @@
 
 
         const $title = document.querySelector('#title');
-        const $category = document.querySelector('#name'); // 'name' 대신 'category'로 변경
+        const $category = document.querySelector('#name'); 
         const $content = document.querySelector('#content');
         const $date = document.querySelector('#date');
         const $participants = document.querySelector('#participants');
@@ -162,8 +162,9 @@
            
             if (data && data.length > 0) {
               for (let i = 0; i < data.length; i++) {
+                let meetingTime = formatDateTime(data[i].date_give);
                 addparty(data[i].category_give, data[i].partparticipants_give, data[i].title_give, 
-                data[i].partymaneserName, data[i].partymanaser_cord, data[i].content_give, data[i].date_give, data[i].userArr);
+                data[i].partymaneserName, data[i].partymanaser_cord, data[i].content_give, meetingTime, data[i].userArr,data[i]._id);
                 console.log(data[i]);
               }
             }
@@ -171,7 +172,7 @@
         });
          
 
-        function addparty(category, participants, title, partyName, partyCord, content, date, memberArr){
+        function addparty(category, participants, title, partyName, partyCord, content, date, memberArr, _id){
            
 
           let checkCode = {
@@ -203,8 +204,8 @@
                     </div>
                     <p class="card-text">${content}</p>
                     <div class="d-flex text-muted small mb-3">
-                        <span><i class="bi bi-calendar"></i> ${date}</span>
-                        <span class="ms-3"><i class="bi bi-clock"></i> 7:00 AM</span>
+                        <span><i class="bi bi-calendar"></i> 예정시간: ${date}</span>
+                        <span class="ms-3"><i class="bi bi-clock"></i></span>
                     </div>
 
                     <button class="btn btn-primary w-100" id="deleteBtn">파티 탈퇴</button>
@@ -238,8 +239,8 @@
                     </div>
                     <p class="card-text">${content}</p>
                     <div class="d-flex text-muted small mb-3">
-                        <span><i class="bi bi-calendar"></i> ${date}</span>
-                        <span class="ms-3"><i class="bi bi-clock"></i> 7:00 AM</span>
+                        <span><i class="bi bi-calendar"></i> 예정시간: ${date}</span>
+                        <span class="ms-3"><i class="bi bi-clock"></i></span>
                     </div>
 
                     <button class="btn btn-primary w-100" id="deleteBtn">삭제버튼</button>
@@ -250,7 +251,7 @@
             cardElement.innerHTML = managerCard;
             cardElement.className = "col-md-4";
            
-            const $deleteBtn = cardElement.querySelector("#deleteBtn").addEventListener('click',()=>deleteParty())
+            const $deleteBtn = cardElement.querySelector("#deleteBtn").addEventListener('click',()=>deleteParty(_id))
             $cardBox.appendChild(cardElement);        
             return;
           } else {
@@ -268,8 +269,8 @@
                     </div>
                     <p class="card-text">${content}</p>
                     <div class="d-flex text-muted small mb-3">
-                        <span><i class="bi bi-calendar"></i> ${date}</span>
-                        <span class="ms-3"><i class="bi bi-clock"></i> 7:00 AM</span>
+                        <span><i class="bi bi-calendar"></i> 예정시간: ${date}</span>
+                        <span class="ms-3"><i class="bi bi-clock"></i></span>
                     </div>
                     <button class="btn btn-primary w-100" id="joinBtn">참석버튼</button>
                  
@@ -340,14 +341,14 @@
 
 
 
-       function deleteParty(){
+       function deleteParty(_id){
         fetch("http://127.0.0.1:5000/deleteParty", {
             method: "POST",
             headers: {
               "Content-Type": "application/json", // 요청 헤더
             },
             body: JSON.stringify({
-            
+            data_Id : _id,
             partyCord_give: partyCode,
             }),
           })
@@ -368,6 +369,27 @@
 
 
         function postPtData(){
+        
+
+
+        const dateInput = $date.value; // 사용자가 입력한 날짜
+        const formattedDate = dateInput.replace(/[-:T]/g, ''); // '-'와 ':' 및 'T'를 제거
+        const date_give = parseInt(formattedDate, 10); // 문자열을 정수로 변환
+
+// 현재 시간을 정수로 변환
+        const now = new Date();
+        const currentFormattedDate = now.toISOString().replace(/[-:T]/g, '').slice(0, 12); // 현재 시간을 'YYYYMMDDHHMM' 형식으로 변환
+        const currentDate = parseInt(currentFormattedDate, 10); // 현재 시간을 정수로 변환
+
+// 시간 차이 계산 (분 단위로 변환)
+        const timeDifference = (date_give - currentDate) / 100; // 100으로 나누어 분 단위로 변환
+
+// 최소 1시간 차이 확인 (60분)
+        if (timeDifference < 60) {
+            alert("최소 1시간 이후부터 일시를 잡을 수 있습니다.");
+            return; // 차이가 1시간 미만이면 함수 종료
+}
+
             fetch("http://127.0.0.1:5000/postPtdata", {
             method: "POST",
             headers: {
@@ -377,7 +399,7 @@
             title_give: $title.value,
             category_give: $category.value,
             content_give: $content.value,
-            date_give: $date.value,
+            date_give: date_give,
             partparticipants_give: $participants.value,
             name_give: UserName,
             partyCord_give:partyCode,
@@ -388,7 +410,8 @@
               if (data.result) {
                 window.location.reload();
                 console.log("성공");
-              } else {
+              } else if(data.result===false) {
+                alert("세 개 이상의 파티는 만들 수 없습니다.");
                 console.log("실패");
               }
             })
@@ -429,7 +452,22 @@ document.getElementById("logoutButton").addEventListener("click", () => {
 });
 
 
+function formatDateTime(number) {
+    // 정수를 문자열로 변환
+    const numberStr = number.toString();
 
+    // 년도 제외하고 나머지 부분 추출
+    const monthDayTime = numberStr.slice(4); // '03140607'
+
+    // 월, 일, 시, 분으로 나누기
+    const month = monthDayTime.slice(0, 2);  // '03'
+    const day = monthDayTime.slice(2, 4);    // '14'
+    const hour = monthDayTime.slice(4, 6);   // '16'
+    const minute = monthDayTime.slice(6, 8);  // '07'
+
+    // 최종 문자열 생성
+    return `${parseInt(month)}월 ${parseInt(day)}일 ${parseInt(hour)}:${minute}분`;
+}
         
 
         

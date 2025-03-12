@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 import jwt
 import datetime
 from functools import wraps
@@ -142,6 +143,11 @@ def post_data():
    partymaneserName = data.get('name_give')
    partymaneserCord_give = data.get('partyCord_give')
 
+
+   party_count = db.party.count_documents({'partymanaser_cord': partymaneserCord_give})
+
+   if party_count >= 3:
+    return jsonify({'result': False})  # 3개 이상인 경우 false 반환
    
    doc = {
      'title_give': title_give,
@@ -183,7 +189,7 @@ def join_party():
 
 @app.route('/lodingdata')
 def load_data():
-    result = list(db.party.find({}))
+    result = list(db.party.find({}).sort('date_give', 1)) 
     data_list = []
     if result:
        for data in result:
@@ -196,6 +202,7 @@ def load_data():
                "partymaneserName": data.get('partymaneserName_name'),
                "partymanaser_cord": data.get('partymanaser_cord'),
                "userArr": data.get('userCord'),
+                '_id': str(data.get('_id')),
         })
        return jsonify(data_list), 200
     else:
@@ -205,20 +212,14 @@ def load_data():
 def delete_Party():
 
     data = request.get_json()
-    party_code = data.get('partyCord_give')
+    data_Id = data.get('data_Id')
 
-    delete_data = db.party.find_one({'partymanaser_cord': party_code})
-      
-    if delete_data:
-        result = db.party.delete_one({'partymanaser_cord': party_code}) 
+    result = db.party.delete_one({'_id': ObjectId(data_Id)})
 
-        if result.deleted_count > 0:  
-   
-            return jsonify({'result': 'true'})
-        else:
-            return jsonify({'result': 'false', 'message': '삭제실패'}), 400  # 수정된 내용이 없을 경우
-    else:
-        return jsonify({'result': 'false', 'message': '해당 파티티는 db에 존재하지 않는다'}), 404
+    if result.deleted_count > 0:
+       return jsonify({"result": "success"})
+    else :
+       return jsonify({"result": "false"})
 
 
 @app.route('/quitParty', methods=['POST'])
@@ -227,7 +228,7 @@ def delete_data():
    partyCode = data.get('partyCode')
    index_give = data.get('index')
    
-
+   
    document = db.party.find_one({'partymanaser_cord': partyCode})
 
    if document and 'userCord' in document:
